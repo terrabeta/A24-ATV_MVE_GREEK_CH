@@ -53,7 +53,7 @@
             header {
             display: flex; /* Use flexbox for layout */
             align-items: center; /* Center items vertically */
-            background-color: #3c3c3c; /* Dark gray background */
+            background-color: #202020; /* Dark gray background */
             height: 90px; /* Set header height */
             width: 100%; /* Full width */
             color: #ffffff; /* White text color */
@@ -82,25 +82,24 @@
             align-items: center; /* Center lines horizontally */
             width: 85px; /* Set width */
             height: 100%; /* Full height of header */
-            background-color: #232323; /* Dark background */
+            background-color: #ffd700; /* Dark background */
             cursor: pointer; /* Pointer cursor on hover */
             box-sizing: border-box; /* Include padding and border in element's total width and height */
             transition: background-color 0.3s; /* Smooth transition for background color */
             }
             /* Change background color on hover */
-            .hamburger-menu.hovered,
-            .hamburger-menu:hover .line {
-            background-color: #ffd700; /* Gold background on hover */
+            .hamburger-menu.hovered, .line {
+            background-color: red; /* Gold background on hover */
             }
             /* Change line color when hamburger is hovered */
             .hamburger-menu.hovered .line {
-            background-color: #000; /* Black lines when hovered */
+            background-color: white; /* Black lines when hovered */
             }
             /* Styling for hamburger menu lines */
             .line {
             width: 40px; /* Set line width */
             height: 2px; /* Set line height */
-            background-color: #ffffff; /* White line color */
+            background-color: black; /* White line color */
             margin: 2.5px 0; /* Space between lines */
             transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out, background-color 0.3s; /* Smooth transitions for transformations and colors */
             }
@@ -142,10 +141,16 @@
             /* Style for preview video element */
             .preview-video-container video {
             width: 100%; /* Full width */
-            height: 100%; /* Full height */
+            height: 91%; /* Full height */
             object-fit: contain; /* Contain video within container */
             display: block; /* Block display */
             cursor: pointer; /* Pointer cursor on hover */
+            }
+            #preview1 {
+            border-top: solid 8px #00cfff; /* Top border */
+            }
+            #preview2 {
+            border-top: solid 8px #f00; /* Top border */
             }
             /* Clock section styling */
             .clock {
@@ -264,7 +269,7 @@
             }
             /* Filler element to maintain layout */
             .content-filler {
-            background-color: #3c3c3c; /* Dark gray background */
+            background-color: #202020; /* Dark gray background */
             height: 100vh; /* Full viewport height */
             }
             /* Sliding menu styling */
@@ -273,10 +278,10 @@
             top: 90px; /* Align below header */
             left: 0; /* Align to left */
             width: 100%; /* Full width */
-            height: calc(100vh - 90px); /* Full viewport height minus header height */
-            background-color: #333; /* Dark gray background */
-            transform: translateX(-100%); /* Hide off-screen to the left */
-            transition: transform 0.4s cubic-bezier(0.08, 0.82, 0.17, 1), visibility 0.4s; /* Smooth transition for sliding in */
+            height: calc(100vh - 140px); /* Full viewport height minus header height */
+            background-color: #ffd700; /* Background Color*/
+            transform: translateY(-100%); /* Hide off-screen to the left */
+            transition: transform 0.4s cubic-bezier(1,0,0,1), visibility 0.4s; /* Smooth transition for sliding in */
             z-index: 1000; /* Ensure above other elements */
             display: flex; /* Use flexbox for layout */
             flex-direction: column; /* Stack items vertically */
@@ -285,7 +290,7 @@
             }
             /* Sliding menu open state */
             .sliding-menu.open {
-            transform: translateX(0); /* Slide into view */
+            transform: translateY(0); /* Slide into view */
             pointer-events: auto; /* Enable pointer events */
             visibility: visible; /* Make visible */
             }
@@ -314,18 +319,18 @@
             .sliding-menu ul li a {
             display: flex; /* Use flexbox for layout */
             align-items: center; /* Center items vertically */
-            justify-content: center; /* Center items horizontally */
-            color: #fff; /* White text color */
+            justify-content: left; /* Center items horizontally */
+            color: #000; /* Black text color */
             text-decoration: none; /* Remove underline from links */
-            font-size: 24px; /* Font size */
-            padding: 30px; /* Padding around text */
+            font-size: 20px; /* Font size */
+            padding: 20px; /* Padding around text */
             box-shadow: 0 9px 39px -3px rgba(0, 0, 0, 0.37); /* Shadow effect */
             transition: background-color 0.3s; /* Smooth transition for background color */
             }
             /* Hover effect for sliding menu links */
             .sliding-menu ul li a:hover {
-            background-color: #ffd700; /* Darker background on hover */
-            color: black; /* Black text color */
+            background-color: #202020; /* Change background color on hover */
+            color: white; /* White text color */
             }
             /* Overlay to capture clicks */
             .click-overlay {
@@ -397,7 +402,7 @@
             /* Responsive design for various screen sizes */
             @media (max-width: 1390px) {
             body {
-            background-color: #3c3c3c; /* Dark background for smaller screens */
+            background-color: #202020; /* Dark background for smaller screens */
             }
             header {
             border-radius: 0; /* Remove border-radius */
@@ -418,8 +423,7 @@
             border-radius: 0; /* Remove border-radius */
             }
             .content-filler {
-            flex: 0; /* Do not grow */
-            height: 40vh; /* No height */
+            height: 0; /* No height at all */
             }
             }
             @media (max-width: 800px) {
@@ -445,21 +449,17 @@
             right: 0; /* Align to right */
             }
             .sliding-menu {
-            transform: translateY(-100%); /* Hide off-screen upwards */
-            background-color: #000000a8;
-            backdrop-filter: blur(20px) brightness(150%);
+            height: auto; /* Auto height for sliding menu */
             }
             .sliding-menu.open {
-            transform: translateY(0); /* Slide into view */
             min-height: 150%; /* Ensure minimum height */
             }
             .page-title {
             font-size: 19px; /* Font size */
             margin-bottom: -1.5px;/* Space below title */
-            color: pink;
             }
             .video-title {
-            margin-bottom: 1.5px;/* Space below title */
+            margin-bottom: 0.5px;/* Space below title */
             }
             }
     </style>
