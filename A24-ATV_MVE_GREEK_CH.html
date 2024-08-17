@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Video Grid with HLS.js Players</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
+    <style>
+        /* Apply to the whole document */
+            html,
+            body {
+            height: 100%; /* Full height for html and body */
+            margin: 0; /* Remove default margin */
+            padding: 0; /* Remove default padding */
+            font-family: "Dela Gothic One", cursive; /* Set custom font */
+            background-color: #eeeeee; /* Light gray background */
+            overflow: hidden; /* Hide overflow to prevent scrolling */
+            }
+            /* Hide scrollbar in Chrome, Safari, and Edge */
+            ::-webkit-scrollbar {
+            display: none; /* Hide scrollbar */
+            }
+            /* Hide scrollbar in Firefox and older versions of IE/Edge */
+            * {
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* Internet Explorer and Edge */
+            }
+            /* Styling for body element */
+            body {
+            overflow: -moz-scrollbars-none; /* IE and older Edge */
+            display: flex; /* Use flexbox for layout */
+            justify-content: center; /* Center content horizontally */
+            }
+            /* Container for main content and layout */
+            .wrapper {
+            display: flex; /* Use flexbox for layout */
+            flex-direction: column; /* Stack children vertically */
+            width: 100%; /* Full width */
+            height: 100vh; /* Full viewport height */
+            margin: 48px 180px 0; /* Margins for spacing */
+            box-sizing: border-box; /* Include padding and border in element's total width and height */
+            box-shadow: 0 0 60px 20px rgb(123, 123, 123); /* Shadow effect */
+            position: relative; /* Position relative for absolute positioning of children */
+            overflow: auto; /* Allow overflow scrolling */
+            border-radius: 20px 20px 0 0; /* Rounded top corners */
+            }
+            /* Header styling */
+            header {
+            display: flex; /* Use flexbox for layout */
+            align-items: center; /* Center items vertically */
+            background-color: #3c3c3c; /* Dark gray background */
+            height: 90px; /* Set header height */
+            width: 100%; /* Full width */
+            color: #ffffff; /* White text color */
+            box-sizing: border-box; /* Include padding and border in element's total width and height */
+            justify-content: space-between; /* Space out children */
+            position: relative; /* Position relative for stacking context */
+            z-index: 1001; /* Ensure header is on top */
+            border-radius: 20px 20px 0 0; /* Rounded top corners */
+            }
+            /* Main content area */
+            main {
+            overflow: hidden; /* Hide overflow in main content area */
+            }
+            /* Left section of header */
+            .header-left {
+            display: flex; /* Use flexbox for layout */
+            align-items: center; /* Center items vertically */
+            height: 100%; /* Full height of header */
+            flex-grow: 1; /* Allow to grow and take available space */
+            }
+            /* Hamburger menu styling */
+            .hamburger-menu {
+            display: flex; /* Use flexbox for layout */
+            flex-direction: column; /* Stack lines vertically */
+            justify-content: center; /* Center lines vertically */
+            align-items: center; /* Center lines horizontally */
+            width: 85px; /* Set width */
+            height: 100%; /* Full height of header */
+            background-color: #232323; /* Dark background */
+            cursor: pointer; /* Pointer cursor on hover */
+            box-sizing: border-box; /* Include padding and border in element's total width and height */
+            transition: background-color 0.3s; /* Smooth transition for background color */
+            }
+            /* Change background color on hover */
+            .hamburger-menu.hovered,
+            .hamburger-menu:hover .line {
+            background-color: #ffd700; /* Gold background on hover */
+            }
+            /* Change line color when hamburger is hovered */
+            .hamburger-menu.hovered .line {
+            background-color: #000; /* Black lines when hovered */
+            }
+            /* Styling for hamburger menu lines */
+            .line {
+            width: 40px; /* Set line width */
+            height: 2px; /* Set line height */
+            background-color: #ffffff; /* White line color */
+            margin: 2.5px 0; /* Space between lines */
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out, background-color 0.3s; /* Smooth transitions for transformations and colors */
+            }
+            /* Transform lines when menu is active */
+            .hamburger-menu.is-active .line:nth-child(1) {
+            transform: translateY(7px) rotate(45deg); /* Transform first line */
+            }
+            .hamburger-menu.is-active .line:nth-child(2) {
+            opacity: 0; /* Hide second line */
+            }
+            .hamburger-menu.is-active .line:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg); /* Transform third line */
+            }
+            /* Logo styling */
+            .logo {
+            height: 90px; /* Set logo height */
+            margin-bottom: 2px; /* Space below logo */
+            }
+            /* Container for mini preview videos in header */
+            .preview-videos {
+            display: flex; /* Use flexbox for layout */
+            height: 100%; /* Full height of header */
+            padding: 0; /* Remove padding */
+            margin: 0; /* Remove margin */
+            flex-grow: 0; /* Do not grow */
+            justify-content: flex-start; /* Align items to the start */
+            }
+            /* Container for each preview video */
+            .preview-video-container {
+            height: 100%; /* Full height */
+            background-color: #000; /* Black background */
+            margin: 0; /* Remove margin */
+            padding: 0; /* Remove padding */
+            display: flex; /* Use flexbox for layout */
+            align-items: center; /* Center content vertically */
+            justify-content: center; /* Center content horizontally */
+            overflow: hidden; /* Hide overflow */
+            }
+            /* Style for preview video element */
+            .preview-video-container video {
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            object-fit: contain; /* Contain video within container */
+            display: block; /* Block display */
+            cursor: pointer; /* Pointer cursor on hover */
+            }
+            /* Clock section styling */
+            .clock {
+            flex: 0 0 185px; /* Fixed size for clock */
+            background-color: #171400; /* Dark background */
+            color: #ffd700; /* Gold text color */
+            font-family: "Space Mono", monospace; /* Custom font */
+            font-size: 26px; /* Font size */
+            text-align: center; /* Center text */
+            box-sizing: border-box; /* Include padding and border in element's total width and height */
+            height: 100%; /* Full height */
+            border-radius: 0 20px 0 0; /* Rounded top right corner */
+            }
+            /* Time styling */
+            #time {
+            font-size: 27px; /* Font size */
+            margin-bottom: -10px; /* Margin to adjust spacing */
+            margin-top: 11.8px; /* Margin to adjust spacing */
+            letter-spacing: -0.5px; /* Adjust letter spacing */
+            font-weight: 600; /* Bold font weight */
+            }
+            /* Date styling */
+            #date {
+            font-size: 21.9px; /* Font size */
+            letter-spacing: -0.5px; /* Adjust letter spacing */
+            font-weight: 600; /* Bold font weight */
+            }
+            /* Page title section styling */
+            .page-title-section {
+            display: flex; /* Use flexbox for layout */
+            align-items: center; /* Center items vertically */
+            justify-content: center; /* Center items horizontally */
+            background-color: #ffd700; /* Gold background */
+            color: black; /* Black text color */
+            height: 50px; /* Set height */
+            width: 100%; /* Full width */
+            box-sizing: border-box; /* Include padding and border in element's total width and height */
+            }
+            /* Page title styling */
+            .page-title {
+            font-size: 24px; /* Font size */
+            padding-bottom: 5px; /* Space below title */
+            }
+            /* Grid layout for video items */
+            .video-grid {
+            display: grid; /* Use grid layout */
+            grid-template-columns: repeat(4, 1fr); /* Four equal columns */
+            width: 100%; /* Full width */
+            box-sizing: border-box; /* Include padding and border in element's total width and height */
+            }
+            /* Video item styling */
+            .video-item {
+            display: flex; /* Use flexbox for layout */
+            flex-direction: column; /* Stack items vertically */
+            align-items: center; /* Center items horizontally */
+            position: relative; /* Relative positioning for children */
+            }
+            /* Container for video element */
+            .video-container {
+            position: relative; /* Relative positioning for absolute children */
+            width: 100%; /* Full width */
+            padding-bottom: 56.25%; /* Aspect ratio (16:9) */
+            background-color: #000000; /* Black background */
+            z-index: 100; /* Ensure video is above other elements */
+            }
+            /* Style for video element */
+            .video-container video {
+            position: absolute; /* Absolute positioning within container */
+            top: 0; /* Align to top */
+            left: 0; /* Align to left */
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            object-fit: cover; /* Cover container */
+            }
+            /* Title section for video items */
+            .video-title-section {
+            display: flex; /* Use flexbox for layout */
+            align-items: center; /* Center items vertically */
+            justify-content: center; /* Center items horizontally */
+            height: 38px; /* Set height */
+            width: 100%; /* Full width */
+            background-color: #ffd700; /* Gold background */
+            color: black; /* Black text color */
+            cursor: pointer; /* Pointer cursor on hover */
+            transition: background-color 0.2s ease; /* Smooth transition for background color */
+            }
+            /* Background color change for video title section when clicked */
+            .change-bg {
+            background-color: #2cff00; /* Green background when text is copied */
+            }
+            /* Video title styling */
+            .video-title {
+            font-size: 16px; /* Font size */
+            margin-bottom: 4.5px; /* Space below title */
+            transition: opacity 0.2s ease-in-out; /* Smooth transition for opacity */
+            }
+            /* Fade-out effect for hidden elements */
+            .fade-out {
+            opacity: 0; /* Invisible */
+            }
+            /* Fade-in effect for visible elements */
+            .fade-in {
+            opacity: 1; /* Visible */
+            }
+            /* Hide elements with this class */
+            .hidden {
+            display: none; /* No display */
+            }
+            /* Filler element to maintain layout */
+            .content-filler {
+            background-color: #3c3c3c; /* Dark gray background */
+            visibility: visible; /* Make visible */
+            height: 100vh; /* Full viewport height */
+            }
+            /* Sliding menu styling */
+            .sliding-menu {
+            position: absolute; /* Absolute positioning */
+            top: 90px; /* Align below header */
+            left: 0; /* Align to left */
+            width: 100%; /* Full width */
+            height: calc(100vh - 90px); /* Full viewport height minus header height */
+            background-color: #333; /* Dark gray background */
+            transform: translateX(-100%); /* Hide off-screen to the left */
+            transition: transform 0.4s cubic-bezier(0.08, 0.82, 0.17, 1), visibility 0.4s; /* Smooth transition for sliding in */
+            z-index: 1000; /* Ensure above other elements */
+            display: flex; /* Use flexbox for layout */
+            flex-direction: column; /* Stack items vertically */
+            pointer-events: none; /* Disable pointer events when hidden */
+            visibility: hidden; /* Hidden by default */
+            }
+            /* Sliding menu open state */
+            .sliding-menu.open {
+            transform: translateX(0); /* Slide into view */
+            pointer-events: auto; /* Enable pointer events */
+            visibility: visible; /* Make visible */
+            }
+            /* Content area within sliding menu */
+            .sliding-menu-content {
+            display: flex; /* Use flexbox for layout */
+            flex-direction: column; /* Stack items vertically */
+            height: 100%; /* Full height */
+            overflow: auto; /* Allow scrolling */
+            }
+            /* Unordered list in sliding menu */
+            .sliding-menu ul {
+            list-style: none; /* Remove list bullets */
+            padding: 0; /* Remove padding */
+            margin: 0; /* Remove margin */
+            display: flex; /* Use flexbox for layout */
+            flex-direction: column; /* Stack items vertically */
+            flex: 1; /* Take available space */
+            overflow-y: auto; /* Allow vertical scrolling */
+            }
+            /* List item in sliding menu */
+            .sliding-menu ul li {
+            flex: 0 0 auto; /* Do not grow or shrink */
+            }
+            /* Link in sliding menu */
+            .sliding-menu ul li a {
+            display: flex; /* Use flexbox for layout */
+            align-items: center; /* Center items vertically */
+            justify-content: center; /* Center items horizontally */
+            color: #fff; /* White text color */
+            text-decoration: none; /* Remove underline from links */
+            font-size: 24px; /* Font size */
+            padding: 30px; /* Padding around text */
+            box-shadow: 0 9px 39px -3px rgba(0, 0, 0, 0.37); /* Shadow effect */
+            transition: background-color 0.3s; /* Smooth transition for background color */
+            }
+            /* Hover effect for sliding menu links */
+            .sliding-menu ul li a:hover {
+            background-color: #444; /* Darker background on hover */
+            }
+            /* Overlay to capture clicks */
+            .click-overlay {
+            position: absolute; /* Absolute positioning */
+            top: 0; /* Align to top */
+            left: 0; /* Align to left */
+            right: 0; /* Align to right */
+            bottom: 60%; /* Cover bottom 60% */
+            background: transparent; /* Transparent background */
+            z-index: 200; /* Ensure above video but below other UI elements */
+            }
+            /* Button to unmute video */
+            .unmute-button {
+            position: absolute; /* Absolute positioning */
+            background-color: red; /* Default red background when muted */
+            border: none; /* No border */
+            color: #fff; /* White text color */
+            padding: 12px; /* Padding around button */
+            cursor: pointer; /* Pointer cursor on hover */
+            font-size: 12px; /* Font size for icon */
+            transition: background-color 0.2s; /* Smooth transition for background color */
+            margin: 10px 0px 0px 10px; /* Margin around button */
+            width: 38px; /* Constrain width */
+            z-index: 300; /* Ensure button is on top */
+            }
+            /* Icon inside the unmute button */
+            .unmute-button i {
+            margin: 0; /* No margin around icon */
+            }
+            /* Hover effect for unmute button */
+            .unmute-button:hover {
+            background-color: #05a90085; /* Change background to green on hover */
+            }
+            /* Unmute button active state */
+            .unmute-button.unmuted {
+            background-color: #05a90085; /* Green background when unmuted */
+            }
+            /* Unmute button muted state */
+            .unmute-button.muted {
+            background-color: #f006; /* Red background when muted */
+            }
+            /* Ensure that the flex container does not expand unexpectedly */
+            .preview-video-container {
+            flex: 0 1 auto; /* Adjust flexibility of the container */
+            position: relative; /* Allows absolute positioning of placeholder */
+            overflow: hidden; /* Hide overflow */
+            width: 100%; /* Constrain width to container */
+            height: 100%; /* Constrain height to container */
+            }
+            /* Style the placeholder image to fit the container */
+            .placeholder-image {
+            position: absolute; /* Absolute positioning within container */
+            top: 0; /* Align to top */
+            left: 0; /* Align to left */
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            object-fit: cover; /* Cover container */
+            z-index: 700 !important; /* Place behind video */
+            }
+            /* Ensure the video element is above the placeholder */
+            .preview-video-container video {
+            position: relative; /* Relative positioning within container */
+            z-index: 2; /* Place above placeholder */
+            }
+            /* Prevent images from interfering with pointer events */
+            img {
+            pointer-events: none; /* Disable pointer events for images */
+            }
+            /* Responsive design for various screen sizes */
+            @media (max-width: 1390px) {
+            body {
+            background-color: #3c3c3c; /* Dark background for smaller screens */
+            }
+            header {
+            border-radius: 0; /* Remove border-radius */
+            position: fixed; /* Fix header at the top */
+            top: 0; /* Align to top */
+            left: 0; /* Align to left */
+            right: 0; /* Align to right */
+            height: 90px; /* Set header height */
+            }
+            main {
+            margin-top: 90px; /* Match height of the fixed header */
+            }
+            .wrapper {
+            margin: 0; /* Remove margins */
+            border-radius: 0; /* Remove border-radius */
+            }
+            .clock {
+            border-radius: 0; /* Remove border-radius */
+            }
+            .content-filler {
+            flex: 0; /* Do not grow */
+            visibility: collapse; /* Hide element */
+            height: 0; /* No height */
+            }
+            }
+            @media (max-width: 800px) {
+            main {
+            overflow: auto; /* Allow scrolling in main */
+            }
+            .preview-videos {
+            visibility: collapse; /* Hide preview videos */
+            }
+            .video-grid {
+            display: block; /* Stack video items vertically */
+            }
+            }
+            @media (max-width: 500px) {
+            .clock {
+            visibility: collapse; /* Hide clock */
+            }
+            header {
+            display: block; /* Stack header items vertically */
+            }
+            .logo {
+            position: absolute; /* Absolute positioning */
+            right: 0; /* Align to right */
+            }
+            .sliding-menu {
+            transform: translateY(-100%); /* Hide off-screen upwards */
+            height: auto; /* Auto height for sliding menu */
+            }
+            .sliding-menu.open {
+            transform: translateY(0); /* Slide into view */
+            min-height: calc(100vh); /* Ensure minimum height */
+            }
+            }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <header>
+            <div class="header-left">
+                <div class="hamburger-menu">
+                    <div class="line"></div>
+                    <div class="line"></div>
+                    <div class="line"></div>
+                </div>
+                <img alt="Logo" class="logo" src="https://i.postimg.cc/vBTTcR16/2-2.png" />
+            </div>
+            <div class="preview-videos">
+                <!-- Mini Preview Players -->
+                <div class="preview-video-container">
+                    <video autoplay="" id="preview1" muted=""></video>
+                </div>
+                <div class="preview-video-container">
+                    <video autoplay="" id="preview2" muted=""></video>
+                </div>
+            </div>
+            <div class="clock" id="clock">
+                <div id="time"></div>
+                <div id="date"></div>
+            </div>
+        </header>
+        <main>
+            <div class="page-title-section">
+                <div class="page-title">
+                    ΕΛΛΗΝΙΚΑ ΚΑΝΑΛΙΑ
+                </div>
+            </div>
+            <div class="video-grid">
+                <div class="video-item">
+                    <div class="video-container">
+                        <video autoplay="" controls="" id="video1" muted=""></video>
+                    </div>
+                    <div class="video-title-section" data-text="TEST 1" id="ttl-style-1">
+                        <div class="video-title">
+                            ANT1
+                        </div>
+                    </div>
+                </div>
+                <div class="video-item">
+                    <div class="video-container">
+                        <video autoplay="" controls="" id="video2" muted=""></video>
+                    </div>
+                    <div class="video-title-section" data-text="TEST 2" id="ttl-style-2">
+                        <div class="video-title">
+                            ALPHA
+                        </div>
+                    </div>
+                </div>
+                <div class="video-item">
+                    <div class="video-container">
+                        <video autoplay="" controls="" id="video3" muted=""></video>
+                    </div>
+                    <div class="video-title-section" data-text="TEST 3" id="ttl-style-3">
+                        <div class="video-title">
+                            ΣΚΑΙ
+                        </div>
+                    </div>
+                </div>
+                <div class="video-item">
+                    <div class="video-container">
+                        <video autoplay="" controls="" id="video4" muted=""></video>
+                    </div>
+                    <div class="video-title-section" data-text="TEST 1" id="ttl-style-4">
+                        <div class="video-title">
+                            ΕΡΤ NEWS
+                        </div>
+                    </div>
+                </div>
+                <div class="video-item">
+                    <div class="video-container">
+                        <video autoplay="" controls="" id="video5" muted=""></video>
+                    </div>
+                    <div class="video-title-section" data-text="TEST 1" id="ttl-style-5">
+                        <div class="video-title">
+                            OPEN
+                        </div>
+                    </div>
+                </div>
+                <div class="video-item">
+                    <div class="video-container">
+                        <video autoplay="" controls="" id="video6" muted=""></video>
+                    </div>
+                    <div class="video-title-section" data-text="TEST 1" id="ttl-style-6">
+                        <div class="video-title">
+                            STAR
+                        </div>
+                    </div>
+                </div>
+                <div class="video-item">
+                    <div class="video-container">
+                        <video autoplay="" controls="" id="video7" muted=""></video>
+                    </div>
+                    <div class="video-title-section" data-text="TEST 1" id="ttl-style-7">
+                        <div class="video-title">
+                            MEGA
+                        </div>
+                    </div>
+                </div>
+                <div class="video-item">
+                    <div class="video-container">
+                        <video autoplay="" controls="" id="video8" muted=""></video>
+                    </div>
+                    <div class="video-title-section" data-text="TEST 1" id="ttl-style-8">
+                        <div class="video-title">
+                            ΒΟΥΛΗ
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sliding-menu" id="sliding-menu">
+                <div class="sliding-menu-content">
+                    <ul>
+                        <li>
+                            <a href="#"><span>START</span></a>
+                        </li>
+                        <li>
+                            <a href="#"><span>About</span></a>
+                        </li>
+                        <li>
+                            <a href="#"><span>Contact</span></a>
+                        </li>
+                        <li>
+                            <a href="#"><span>Home</span></a>
+                        </li>
+                        <li>
+                            <a href="#"><span>About</span></a>
+                        </li>
+                        <li>
+                            <a href="#"><span>Contact</span></a>
+                        </li>
+                        <li>
+                            <a href="#"><span>Home</span></a>
+                        </li>
+                        <li>
+                            <a href="#"><span>END</span></a>
+                        </li>
+                        <!-- More menu items -->
+                    </ul>
+                </div>
+            </div>
+            <div class="content-filler"></div>
+        </main>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+        
+        
+            // Check if Hls.js is loaded
+            if (typeof Hls === "undefined") {
+                console.error("Hls.js is not loaded");
+                return;
+            }
+        
+        
+            console.log("Hls.js version:", Hls.version);
+            if (Hls.isSupported()) {
+                console.log("HLS.js is supported");
+        
+        
+                const videoMuteState = new Map();
+                const unmuteButtons = new Map();
+                const manuallyUnmutedVideos = new Set();
+                let currentlyFullscreenPreview = null;
+                let lastPlaybackPosition = 0;
+        
+        
+                // Function to change text with a fade transition effect
+                const changeTextWithTransition = (element, newText, duration) => {
+        
+        
+                    const originalText = element.textContent;
+                    const section = element.closest(".video-title-section");
+                    if (section) {
+                        section.classList.add("change-bg");
+                    }
+                    element.classList.add("fade-out");
+                    setTimeout(() => {
+                        element.textContent = newText;
+                        element.classList.remove("fade-out");
+                        element.classList.add("fade-in");
+                        setTimeout(() => {
+                            element.classList.remove("fade-in");
+                            element.classList.add("fade-out");
+                            setTimeout(() => {
+                                element.textContent = originalText;
+                                element.classList.remove("fade-out");
+                                element.classList.add("fade-in");
+                                setTimeout(() => {
+                                    element.classList.remove("fade-in");
+                                    if (section) {
+                                        section.classList.remove("change-bg");
+                                    }
+                                }, 1);
+                            }, 1);
+                        }, duration);
+                    }, 1);
+                };
+        
+        
+                // Function to set a placeholder image on a video element
+                const setPlaceholderImage = (videoElement, placeholderUrl) => {
+        
+        
+                    const parent = videoElement.parentElement;
+                    const img = document.createElement("img");
+                    img.src = placeholderUrl;
+                    img.style.position = "absolute";
+                    img.style.top = "0";
+                    img.style.left = "0";
+                    img.style.width = "100%";
+                    img.style.height = "100%";
+                    img.style.objectFit = "cover";
+                    img.style.zIndex = "1";
+                    img.className = "placeholder-image";
+                    parent.appendChild(img);
+                };
+        
+        
+                // Function to remove the placeholder image from a video element
+                const removePlaceholderImage = (videoElement) => {
+        
+        
+                    const parent = videoElement.parentElement;
+                    const img = parent.querySelector(".placeholder-image");
+                    if (img) {
+                        parent.removeChild(img);
+                    }
+                };
+        
+        
+                // Function to update the state and appearance of the unmute button
+                const updateUnmuteButtonState = (video) => {
+        
+        
+                    const button = unmuteButtons.get(video);
+                    if (button) {
+                        const isMuted = video.muted;
+                        button.classList.toggle("muted", isMuted);
+                        button.classList.toggle("unmuted", !isMuted);
+                        button.innerHTML = isMuted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
+                    }
+                };
+        
+        
+                const videoSrc = [
+                    "https://d1nfykbwa3n98t.cloudfront.net/out/v1/6e5667da5a6843899a337dea72adb61b/antenna_3.m3u8",
+                    "https://alphatvlive.siliconweb.com/1/Y2Rsd1lUcUVoajcv/UVdCN25h/hls/live/playlist.m3u8",
+                    "https://skai-live-back.siliconweb.com/media/cambria4/index_bitrate600K.m3u8",
+                    "https://ertflix.s.llnwi.net/ertlive/ertnews/default/ERTNews-audio_104621_und=104400-video=800000.m3u8",
+                    "https://liveopencloud.siliconweb.com/1/ZlRza2R6L2tFRnFJ/eWVLSlQx/hls/live/playlist.m3u8",
+                    "https://livestar.siliconweb.com/starvod/star4/star4low.m3u8",
+                    "https://c98db5952cb54b358365984178fb898a.msvdn.net/live/S86713049/gonOwuUacAxM/chunklist_b732000.m3u8",
+                    "https://streamer-cache.grnet.gr/parliament/hls/webtv_640_640x360/index.m3u8",
+                ];
+                const videoGridPlayers = document.querySelectorAll(".video-container video");
+                const placeholderUrl = "https://i.postimg.cc/K8jDGdJd/OFFLINE.png";
+        
+        
+                // Initialize video players with HLS sources and set up their event handlers
+                videoGridPlayers.forEach((video, index) => {
+                    if (videoSrc[index]) {
+                        const hls = new Hls();
+                        hls.loadSource(videoSrc[index]);
+                        hls.attachMedia(video);
+                        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                            console.log(`Video ${index + 1} manifest parsed`);
+                            video.play().catch((error) => {
+                                console.error(`Error playing video ${index + 1}:`, error);
+                                setPlaceholderImage(video, placeholderUrl);
+                            });
+                        });
+                        hls.on(Hls.Events.ERROR, (event, data) => {
+                            console.error(`HLS.js Error [${data.fatal}]:`, data);
+                            if (data.fatal) {
+                                setPlaceholderImage(video, placeholderUrl);
+                            }
+                        });
+                        video.addEventListener("play", () => {
+                            removePlaceholderImage(video);
+                        });
+                    } else {
+                        console.error(`No video source for index ${index}`);
+                        setPlaceholderImage(video, placeholderUrl);
+                    }
+        
+        
+                    // Initialize mute state and show button
+                    video.muted = true;
+                    videoMuteState.set(video, true);
+        
+        
+                    // Create unmute button
+                    const unmuteButton = document.createElement("button");
+                    unmuteButton.className = "unmute-button muted";
+                    updateUnmuteButtonState(video);
+                    video.parentElement.appendChild(unmuteButton);
+                    unmuteButtons.set(video, unmuteButton);
+        
+        
+                    // Create overlay to prevent clicks on video
+                    const overlay = document.createElement("div");
+                    overlay.className = "click-overlay";
+                    video.parentElement.appendChild(overlay);
+        
+        
+                    // Button click event to toggle mute state
+                    unmuteButton.addEventListener("click", () => {
+                        const isMuted = !video.muted;
+                        video.muted = isMuted;
+                        videoMuteState.set(video, isMuted);
+                        updateUnmuteButtonState(video);
+        
+        
+                        // Mute all other grid videos
+                        videoGridPlayers.forEach((otherVideo) => {
+                            if (otherVideo !== video) {
+                                otherVideo.muted = true;
+                                videoMuteState.set(otherVideo, true);
+                                updateUnmuteButtonState(otherVideo);
+                            }
+                        });
+                    });
+        
+        
+                    // Prevent clicks on video from pausing
+                    overlay.addEventListener("click", (event) => {
+                        event.stopPropagation();
+                    });
+        
+        
+                    // Ensure the button is visible on page load
+                    updateUnmuteButtonState(video);
+                });
+        
+        
+                const previewSources = ["https://actionlive.siliconweb.com/actionabr/actiontv/playlist.m3u8", "https://atticatv.siliconweb.com/atticatv/atticaliveabr/playlist.m3u8"];
+                const previewVideos = document.querySelectorAll(".preview-video-container video");
+        
+        
+                // Initialize preview videos with HLS sources and set up their event handlers
+                previewVideos.forEach((preview, index) => {
+                    if (previewSources[index]) {
+                        const hls = new Hls();
+                        hls.loadSource(previewSources[index]);
+                        hls.attachMedia(preview);
+                        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                            console.log(`Preview ${index + 1} manifest parsed`);
+                            preview.play().catch((error) => {
+                                console.error(`Error playing preview ${index + 1}:`, error);
+                                setPlaceholderImage(preview, placeholderUrl);
+                            });
+                        });
+                        hls.on(Hls.Events.ERROR, (event, data) => {
+                            console.error(`HLS.js Error [${data.fatal}]:`, data);
+                            if (data.fatal) {
+                                setPlaceholderImage(preview, placeholderUrl);
+                            }
+                        });
+                        preview.addEventListener("play", () => {
+                            removePlaceholderImage(preview);
+                        });
+                    } else {
+                        console.error(`No preview source for index ${index}`);
+                        setPlaceholderImage(preview, placeholderUrl);
+                    }
+                });
+        
+        
+                // Fullscreen behavior for preview videos
+                previewVideos.forEach((preview) => {
+                    preview.addEventListener("click", () => {
+                        if (document.fullscreenElement) {
+                            document
+                                .exitFullscreen()
+                                .then(() => {
+                                    // Restore mute state and resume preview video after exiting fullscreen
+                                    if (currentlyFullscreenPreview) {
+                                        currentlyFullscreenPreview.muted = true;
+                                        videoGridPlayers.forEach((video) => {
+                                            if (manuallyUnmutedVideos.has(video)) {
+                                                video.muted = false;
+                                            } else {
+                                                video.muted = true;
+                                            }
+                                            updateUnmuteButtonState(video);
+                                        });
+                                        // Resume the preview video stream from the last playback position
+                                        currentlyFullscreenPreview.currentTime = lastPlaybackPosition;
+                                        currentlyFullscreenPreview.play().catch((error) => {
+                                            console.error("Error resuming preview video:", error);
+                                        });
+                                        currentlyFullscreenPreview = null;
+                                        manuallyUnmutedVideos.clear(); // Clear the set
+                                    }
+                                })
+                                .catch((error) => {
+                                    console.error("Error exiting fullscreen:", error);
+                                });
+                        } else {
+                            // Track the current playback position before entering fullscreen
+                            lastPlaybackPosition = preview.currentTime;
+                            preview
+                                .requestFullscreen()
+                                .then(() => {
+                                    currentlyFullscreenPreview = preview;
+                                    preview.muted = false; // Unmute the preview video
+                                    // Mute all grid videos when preview is in fullscreen
+                                    videoGridPlayers.forEach((video) => {
+                                        if (!video.muted) {
+                                            manuallyUnmutedVideos.add(video); // Track manually unmuted videos
+                                        }
+                                        video.muted = true;
+                                        videoMuteState.set(video, true);
+                                    });
+                                })
+                                .catch((error) => {
+                                    console.error("Error entering fullscreen:", error);
+                                });
+                        }
+                    });
+                });
+        
+        
+                // Hamburger menu toggle
+                const hamburgerMenu = document.querySelector(".hamburger-menu");
+                const slidingMenu = document.getElementById("sliding-menu");
+                if (hamburgerMenu && slidingMenu) {
+                    // Function to toggle the visibility of the sliding menu
+                    const toggleMenu = () => {
+                        const isActive = slidingMenu.classList.toggle("open");
+                        hamburgerMenu.classList.toggle("hovered", isActive);
+                        hamburgerMenu.classList.toggle("is-active", isActive);
+                    };
+        
+        
+                    // Click event to toggle menu
+                    hamburgerMenu.addEventListener("click", toggleMenu);
+        
+        
+                    // Keydown event to close menu with ESC key
+                    document.addEventListener("keydown", (event) => {
+                        if (event.key === "Escape" && slidingMenu.classList.contains("open")) {
+                            toggleMenu();
+                        }
+                    });
+                } else {
+                    console.error("Hamburger menu or sliding menu element not found");
+                }
+        
+        
+                // Function to copy text to clipboard
+                const copyTextToClipboard = (text) => {
+                    if (navigator.clipboard) {
+                        navigator.clipboard
+                            .writeText(text)
+                            .then(() => {
+                                console.log("Text copied to clipboard!");
+                            })
+                            .catch((err) => {
+                                console.error("Failed to copy text:", err);
+                            });
+                    } else {
+                        const textArea = document.createElement("textarea");
+                        textArea.value = text;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        try {
+                            document.execCommand("copy");
+                            console.log("Text copied to clipboard!");
+                        } catch (err) {
+                            console.error("Failed to copy text:", err);
+                        }
+                        document.body.removeChild(textArea);
+                    }
+                };
+        
+        
+                // Attach click event to video-title-section elements with updated behavior
+                const videoTitleSections = document.querySelectorAll(".video-title-section");
+                if (videoTitleSections.length > 0) {
+                    videoTitleSections.forEach((section) => {
+                        const videoTitle = section.querySelector(".video-title");
+                        if (videoTitle) {
+                            section.addEventListener("click", () => {
+                                const textToCopy = section.getAttribute("data-text");
+                                if (textToCopy) {
+                                    copyTextToClipboard(textToCopy);
+                                    changeTextWithTransition(videoTitle, "ΑΝΤΙΓΡΑΦΗΚΕ", 500); // Faster transition
+                                } else {
+                                    console.error("No text to copy");
+                                }
+                            });
+                        } else {
+                            console.error("Video title element not found in section");
+                        }
+                    });
+                } else {
+                    console.error("No video title sections found");
+                }
+        
+        
+                // Function to update the current time and date
+                function updateClock() {
+                    const now = new Date();
+                    const hours = String(now.getHours()).padStart(2, "0");
+                    const minutes = String(now.getMinutes()).padStart(2, "0");
+                    const seconds = String(now.getSeconds()).padStart(2, "0");
+                    const day = String(now.getDate()).padStart(2, "0");
+                    const month = String(now.getMonth() + 1).padStart(2, "0");
+                    const year = now.getFullYear();
+                    const timeString = `${hours}:${minutes}:${seconds}`;
+                    const dateString = `${day}-${month}-${year}`;
+                    const timeElement = document.getElementById("time");
+                    const dateElement = document.getElementById("date");
+                    if (timeElement) {
+                        timeElement.textContent = timeString;
+                    } else {
+                        console.error("Time element not found");
+                    }
+                    if (dateElement) {
+                        dateElement.textContent = dateString;
+                    } else {
+                        console.error("Date element not found");
+                    }
+                }
+                setInterval(updateClock, 1000);
+                updateClock();
+        
+            } else {
+                console.error("HLS.js is not supported in this browser.");
+            }
+        
+        });
+    </script>
+</body>
+
+</html>
