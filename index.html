@@ -219,12 +219,21 @@
             width: 100%; /* Full width */
             height: 100%; /* Full height */
             }
+            .video-container iframe,
+            .video-container video {
+            position: absolute; /* Absolute positioning within container */
+            top: 0; /* Align to top */
+            left: 0; /* Align to left */
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            border: 0; /* No borders */
+            }
             /* Title section for video items */
             .video-title-section {
             display: flex; /* Use flexbox for layout */
             align-items: center; /* Center items vertically */
             justify-content: center; /* Center items horizontally */
-            height: 38px; /* Set height */
+            height: 40px; /* Set height */
             width: 100%; /* Full width */
             background-color: #ffd700; /* Gold background */
             color: black; /* Black text color */
@@ -238,7 +247,7 @@
             /* Video title styling */
             .video-title {
             font-size: 16px; /* Font size */
-            margin-bottom: 4.5px; /* Space below title */
+            margin-bottom: 4px; /* Space below title */
             transition: opacity 0.2s ease-in-out; /* Smooth transition for opacity */
             }
             /* Fade-out effect for hidden elements */
@@ -441,14 +450,15 @@
             }
             .sliding-menu.open {
             transform: translateY(0); /* Slide into view */
-            min-height: 150%; /* Ensure minimum height */
+            min-height: 150px; /* Ensure minimum height */
             }
             .page-title {
             font-size: 19px; /* Font size */
-            margin-bottom: -1.5px;
+            margin-bottom: -1.5px;/* Space below title */
             }
             .video-title {
-            margin-bottom: 0.5px;
+            margin-bottom: 0.5px;/* Space below title */
+            }
             }
     </style>
 </head>
@@ -507,7 +517,7 @@
                 </div>
                 <div class="video-item">
                     <div class="video-container">
-                        <video autoplay="" controls="" id="video3" muted=""></video>
+                        <iframe id="video3" src="https://www.youtube.com/embed/ZHIPH7ALzJ4?autoplay=1&mute=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
                     </div>
                     <div class="video-title-section" data-text="https://skai-live-back.siliconweb.com/media/cambria4/index.m3u8" id="ttl-style-3">
                         <div class="video-title">
@@ -708,7 +718,6 @@
                 const videoSrc = [
                     "https://d1nfykbwa3n98t.cloudfront.net/out/v1/6e5667da5a6843899a337dea72adb61b/antenna_3.m3u8",
                     "https://alphatvlive.siliconweb.com/1/Y2Rsd1lUcUVoajcv/UVdCN25h/hls/live/playlist.m3u8",
-                    "https://skai-live-back.siliconweb.com/media/cambria4/index_bitrate600K.m3u8",
                     "https://ertflix.s.llnwi.net/ertlive/ertnews/default/ERTNews-audio_104621_und=104400-video=800000.m3u8",
                     "https://liveopencloud.siliconweb.com/1/ZlRza2R6L2tFRnFJ/eWVLSlQx/hls/live/playlist.m3u8",
                     "https://livestar.siliconweb.com/starvod/star4/star4low.m3u8",
